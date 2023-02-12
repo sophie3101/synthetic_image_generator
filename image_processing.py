@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 import sys
 import matplotlib.pyplot as plt
-np.set_printoptions(threshold=sys.maxsize)
+import argparse
 
 class ImageHandler:
   def image_to_matrix(self, image_file):
@@ -20,6 +20,26 @@ class ImageHandler:
     plt.imshow(cv2.bitwise_not(matrix))
     plt.colorbar()
     plt.show()
+  
+  def show_two_images(self, image1_path, image2_path, outfile_path):
+    img1 = plt.imread(image1_path)
+    img2 = plt.imread(image2_path)
+
+    _, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
+
+    ax1.imshow(img1)
+    ax1.set_title('Original Image')
+    ax1.axis("off")
+
+    ax2.imshow(img2)
+    ax2.set_title('Color by cell number')
+    ax2.axis("off")
+
+    # plt.show()
+    plt.savefig(outfile_path)
+
+  def rezize_image(self):
+    return
 
 class Image:
   def __init__(self, matrix):
@@ -28,6 +48,9 @@ class Image:
   
   def __repr__(self):
     return f"type{type(self.matrix)} shape {self.matrix.shape}"
+  
+  def get_size(self):
+    return self.image_matrix.shape
 
   def set_label_matrix(self, matrix):
     self.label_matrix = matrix
@@ -36,15 +59,17 @@ class ImageProcesser:
   def __init__(self, matrix):
     self.image = Image(matrix)
 
-  def process_image(self, opening = True, connectivity = 4, cell_size_threshold = 9, required_cell_number = 10, by_area = True, output_image = 'output.png'):
+  def process_image(self, opening = True, connectivity = 4, cell_size_threshold = 9, required_cell_number = 10, by_area = True):
     """
     Step1: Convert image to grayscale
     Step2: Convert grayscale image to black and white color
     https://s3.ap-northeast-2.amazonaws.com/journal-home/journal/jips/fullText/360/jips_2_00009.pdf
     """
+    
     gray_matrix = self.to_grayscale(self.image.image_matrix)
     guassian_matrix = self.apply_guassian(gray_matrix)
     binary_matrix = self.apply_otus_thresholding(guassian_matrix)
+    # ImageHandler().matrix_to_image(binary_matrix)
     # with opening morphological operation
     if opening:
       out_matrix = self.apply_morphological_operation(binary_matrix)
@@ -52,21 +77,10 @@ class ImageProcesser:
       out_matrix = self.apply_watershed(binary_matrix)
     
     self.image.valid = self.identify_cells(out_matrix, connectivity, cell_size_threshold, required_cell_number, by_area)
-    if self.image.valid:
-      print('meet requirement') 
+
+  def output_color_image(self, output_image = "color_cells.png"):
       self.image.set_label_matrix(self.label_matrix)
       self.color_cell_by_number(self.label_matrix, output_image)
-
-  # """
-  # Preprocessing the image
-  # """
-  # def convert_to_grayscale(self):
-  #   # deprecated method. Use 
-  #   # follow grayscale algorith of opencv https://docs.opencv.org/2.4/modules/imgproc/doc/miscellaneous_transformations.html#void%20cvtColor%28InputArray%20src,%20OutputArray%20dst,%20int%20code,%20int%20dstCn%29
-  #   gray_matrix = [ [int(0.299*pixel[0] + 0.587*pixel[1] + 0.114*pixel[2]) for pixel in row] for row in self.matrix ]
-  #   gray_matrix = np.array(gray_matrix).astype(np.uint8)
-  #   np.save('gray_matrix.npy', gray_matrix)
-  #   return gray_matrix
   
   def to_grayscale(self, matrix):
     return cv2.cvtColor(matrix, cv2.COLOR_BGR2GRAY)
@@ -123,16 +137,17 @@ class ImageProcesser:
     cv2.CC_STAT_AREA The total area (in pixels) of the connected component ( 4th index)
     """
     output = cv2.connectedComponentsWithStats(matrix, connectivity, cv2.CV_8UC1)
- 
+
     # first cells tell how many cells in matrix
     # second cell is label matrix
     # third is stat matrix
     # output[0] gives the total number of connected components including the background
     num_components = output[0] -1 
+    print("num of componenents", num_components)
     if num_components < required_cell_number:
       return 0
 
- 
+
     # The third cell is the stat matrix
     stats = output[2]
 
@@ -143,7 +158,7 @@ class ImageProcesser:
         area = stats[i, cv2.CC_STAT_AREA]
       else: # use CC_STAT_WIDTH
         area = stats[i, cv2.CC_STAT_WIDTH]
-        
+      # print('cell size ', area)
       if area >= cell_size_threshold:
           cell_count += 1
  
