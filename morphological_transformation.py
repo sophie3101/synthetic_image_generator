@@ -1,16 +1,8 @@
 import numpy as np
 import cv2
-class CV2Operation:
-  # def __init__(self, iteration_num, kernel_size, use_kernel=True):
-  #   """
-  #   Initialize parameter for class CV2Operation
-  #   :param int kernel_size: size for kernel
-  #   :param int iteration_num: number of times erosion method is performed
-  #   """
-  #   self.iteration_num = iteration_num
-  #   self.kernel_size = kernel_size
-    
+import sys
 
+class CV2Operation:
   def set_kernel_size(self, kernel_size):
     self.kernel_size = kernel_size
     self.kernel = np.ones((kernel_size, kernel_size), np.uint8)
@@ -33,6 +25,9 @@ class CV2Operation:
     """
     return cv2.resize(matrix, (output_size, output_size))
 
+  def get_stats(self, matrix, connectivity):
+    return cv2.connectedComponentsWithStats(matrix, connectivity, cv2.CV_32S)
+
   def apply_color_scale(self, matrix):
     return cv2.applyColorMap(matrix, cv2.COLORMAP_JET) 
 
@@ -54,19 +49,55 @@ class CV2Operation:
     return threshold_matrix
 
   def apply_morphological_operation(self, choice, matrix):
+    """Apply morphological operation with method selected by user
+    Erosion: erase boundary of foreground object
+    Closing: Dilation followed by Erosion
+    Top Hat: Difference between original image and image after opening method
+    Black Hat: Difference between original image and image after closing method
+    When kernel is slide through matrix image, 
+    pixel become 1 if all pixcel under kernel is 1, otherwise 0
+    :param np.array matrix: 2D matrix of gray image 
+    :return np.array: output matrix after erosion is performed
+    """
     print('Choice :',choice)
-    # if choice == "opening":
-    #   self.opening(matrix)
-    dispatch = {
-      'opening': self.opening(matrix),
-      'closing': self.closing(matrix),
-      'watershed': self.watershed(matrix),
-      'dilation': self.dilation(matrix),
-      'erosion': self.erosion(matrix),
-      'top_hat': self.top_hat(matrix),
-      'black_hat': self.black_hat(matrix)
-    }
-    return dispatch.get(choice)
+    choices = ['opening', 'closing', 'watershed', 'dilation', 'erosion', 'top_hat', 'black_hat', 'gradient']
+    if choice not in choices:
+      sys.exit(f"Choice {choice} is not supported")
+
+    if choice == 'opening': 
+      return self.opening(matrix)
+    elif choice == 'closing':
+      return self.cv2.morphologyEx(matrix, cv2.MORPH_CLOSE, self.kernel)
+    elif choice == 'watershed':
+      return self.watershed(matrix)
+    elif choice == 'dilation':
+      return self.dilation(matrix)
+    elif choice == 'erosion':
+      return cv2.erode( matrix, self.kernel, iterations=self.iteration_num)
+    elif choice == 'top_hat':
+      return cv2.morphologyEx(matrix, cv2.MORPH_TOPHAT, self.kernel)
+    elif choice == 'black_hat':
+      return cv2.morphologyEx(matrix, cv2.MORPH_BLACKHAT, self.kernel)
+    elif choice == 'gradient':
+      return self.gradient(matrix)
+
+  def opening(self, matrix):
+    """Erosion followed by Dilation
+    :return np.array: output matrix after opening is performed
+    """
+    print('choose opening')
+    return cv2.morphologyEx(matrix, cv2.MORPH_OPEN, kernel=self.kernel, iterations=self.iteration_num)
+
+  def dilation(self, matrix):
+    """Increase region of foreground object
+    When kernel is slide through matrix image, 
+    pixel become 1 if all pixcel under kernel is 1, otherwise 0
+    :param np.array matrix: 2D matrix of gray image 
+    :return np.array: output matrix after erosion is performed
+    """
+    print ('Choose dilation')
+    return cv2.dilate(matrix, self.kernel, iterations=self.iteration_num)
+
   def watershed(self, matrix):
     """
     Apply image segmentation using watershed algorithm
@@ -76,66 +107,25 @@ class CV2Operation:
     Erosion removes boundary pixels so what remains are sure to be objects ( cells)
     If cells are attach, we apply distance transform
     """
-    return
-    # # noise removal
-    # opening_matrix = self.opening(matrix)
+    print('choose watershed method')
+    # noise removal
+    opening_matrix = self.opening(matrix)
 
     # # sure background area
     # sure_bg = self.dilation(opening_matrix) 
 
-    # # Finding sure foreground area
-    # dist_transform = cv2.distanceTransform(opening_matrix, cv2.DIST_L2, 5)
-    # # markers for the foreground objects
-    # ret, sure_fg = cv2.threshold(dist_transform, 0.7*dist_transform.max(), 255, 0)
+    # Finding sure foreground area
+    dist_transform = cv2.distanceTransform(opening_matrix, cv2.DIST_L2, 5)
+    # markers for the foreground objects
+    ret, sure_fg = cv2.threshold(dist_transform, 0.7*dist_transform.max(), 255, 0)
 
-    # return sure_fg 
-  
-  def erosion(self, matrix):
-    """Erase boundary of foreground objects
-    When kernel is slide through matrix image, 
-    pixel become 1 if all pixcel under kernel is 1, otherwise 0
-    :param np.array matrix: 2D matrix of gray image 
-    :return np.array: output matrix after erosion is performed
-    """
-    return cv2.erode( matrix, self.kernel, iterations=self.iteration_num)
+    return sure_fg 
 
-  def dilation(self, matrix):
-    """Increase region of foreground bject
-    When kernel is slide through matrix image, 
-    pixel become 1 if all pixcel under kernel is 1, otherwise 0
-    :param np.array matrix: 2D matrix of gray image 
-    :return np.array: output matrix after erosion is performed
-    """
-    return cv2.dilate( matrix, self.kernel, iterations=self.iteration_num)
-  
-  def opening(self, matrix):
-    """Erosion followed by Dilation
-    :return np.array: output matrix after opening is performed
-    """
-    print('CHOSE OPENING METHOD')
-    return cv2.morphologyEx(matrix, cv2.MORPH_OPEN, self.kernel)
-  
-  def closing(self, matrix):
-    """Dilation followed by Erosion
-    :return np.array: output matrix after closing is performed
-    """
-    return cv2.morphologyEx(matrix, cv2.MORPH_CLOSE, self.kernel)
-  
   def gradient(self, matrix):
     """The difference between dilation and erosion of an image
     :return np.array: output matrix after gradient method is applied
     """
-    dilation_matrix = self.dilation(matrix)
+    dilation_matrix = cv2.dilate( matrix, self.kernel, iterations=self.iteration_num)
     return cv2.morphologyEx(dilation_matrix, cv2.MORPH_GRADIENT, self.kernel)
   
-  def top_hat(self, matrix):
-    """Difference between original image and image after opening method
-    :return np.array: output matrix after TOP HAT method is applied
-    """
-    return cv2.morphologyEx(matrix, cv2.MORPH_TOPHAT, self.kernel)
-
-  def black_hat(self, matrix):
-    """Difference between original image and image after closing method
-    :return np.array: output matrix after BLACK HAT method is applied
-    """
-    return cv2.morphologyEx(matrix, cv2.MORPH_BLACKHAT, self.kernel)
+ 

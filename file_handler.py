@@ -10,5 +10,6 @@ def check_if_exist(path):
 
 def get_base_name(path):
   return os.path.basename(path)
+  
 def remove_path(path):
   os.remove(path)
