@@ -1,6 +1,5 @@
 from image_processing import ImageProcesser, ImageHandler
 from file_handler import remove_path, get_base_name
-import sys 
 
 class SegmentationGenerator:
   def __init__(self, input_image, output_folder, output_image_size, cell_size_threshold, cell_count, connectivity, by_area, morphological_choice, kernel_size, iteration_times, get_blur):
@@ -35,7 +34,11 @@ class SegmentationGenerator:
 .Apply morphological operation on image with method: `{self.morphological_choice}` using kernel size {self.kernel_size} and iterate this method {self.iteration_times} times"
 
   def generate_segmentation_images(self):
-    # Generate segmentation images and save outputs to folder
+    """
+    Read image to matrix
+    Resize matrix to a matrix of size 2048x2048 if size of matrix is not 2048x2048
+    Generate all possible segmentation images and save outputs to folder
+    """
     self.image_handler = ImageHandler()
     img_matrix = self.image_handler.image_to_matrix(self.input_image)
     r, c = self.image_handler.get_image_size(img_matrix)
@@ -61,18 +64,23 @@ class SegmentationGenerator:
       for j in range(0, width - step, self.cell_size_threshold):
         print(f"Processing image at coordinates: {i} {j}")
         slice_matrix = img_matrix[i : i + step, j : j + step, :]
-        self.image_handler.matrix_to_file(f"{self.output_folder}/{i}_{j}.png", slice_matrix)
+        
         image_processor = ImageProcesser(slice_matrix)
         image_processor.process_image(morphological_method=self.morphological_choice, connectivity=self.connectivity, cell_size_threshold=self.cell_size_threshold,
           required_cell_number=self.cell_count, by_area=self.by_area, kernel_size=self.kernel_size, iteration_times=self.iteration_times, blur=self.get_blur)
-        if not image_processor.has_valid_matrix(): 
-          remove_path(f"{self.output_folder}/{i}_{j}.png")
-        else:
+        if image_processor.has_valid_matrix(): 
           print("FOUND IT")
-          self.image_handler.matrix_to_file(file_name=f"{self.output_folder}/color_image_{i}_{j}.png", matrix=image_processor.color_matrix)
           # get black and white image 
           self.image_handler.matrix_to_file(file_name=f"{self.output_folder}/binary_image_{i}_{j}.png", matrix=image_processor.binary_matrix)
+          # get original image
+          self.image_handler.matrix_to_file(f"{self.output_folder}/{i}_{j}.png", slice_matrix)
+          # get image with cell color by label
+          self.image_handler.matrix_to_file(file_name=f"{self.output_folder}/color_image_{i}_{j}.png", matrix=image_processor.color_matrix)
+          # show two images
           self.image_handler.show_two_images(f"{self.output_folder}/{i}_{j}.png", f"{self.output_folder}/color_image_{i}_{j}.png", f"{self.output_folder}/out_{i}_{j}.png")
           remove_path(f"{self.output_folder}/{i}_{j}.png")
           remove_path(f"{self.output_folder}/color_image_{i}_{j}.png")
           # sys.exit(0)
+        # else:
+        #   remove_path(f"{self.output_folder}/{i}_{j}.png")
+         

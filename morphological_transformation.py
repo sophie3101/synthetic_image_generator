@@ -12,7 +12,7 @@ class CV2Operation:
     # else:
     #   self.kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (self.kernel_size, self.kernel_size))
     self.sigma = 0.3*((self.kernel_size-1)*0.5 - 1) + 0.8 
-    print('sigma ', self.sigma)
+    # print('sigma ', self.sigma)
 
   def set_iteration_num(self, iteration_num):
     self.iteration_num = iteration_num

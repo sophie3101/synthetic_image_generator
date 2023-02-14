@@ -140,7 +140,6 @@ class ImageProcesser:
     :return boolean 1(True) if matrix contains required cells otherwise 0
     """
     output = self.cv2_operator.get_stats(matrix, connectivity) 
-    print(output)
     num_components = output[0] -1 
     print("num of componenents", num_components)
     if num_components < required_cell_number:
