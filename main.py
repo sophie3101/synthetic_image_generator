@@ -1,6 +1,6 @@
-import argparse, sys
+import argparse, sys, traceback
 from segmentation_generator import SegmentationGenerator
-from file_handler import create_directory, check_if_exist
+from file_handler import create_directory, check_if_exist, is_image_file
 
 def str_to_bool(val):
     if isinstance(val, bool):
@@ -18,17 +18,21 @@ def main():
   parser.add_argument( '--s', '-image_size', default=128, type=int, help='size of output segmentation image', dest='image_size')
   parser.add_argument( '--t', '-cell_size_threshold', default=10, type=int, help='minimum size of cell', dest='cell_size')
   parser.add_argument( '--n', '-cell_count', default=10, type=int, help='number of cells in output image', dest='cell_count')
-  parser.add_argument( '--count_by_area', type=str_to_bool, nargs='?', const=False, default=True, help='if cell size is determined by area(True) or cell width (False)')
-  parser.add_argument('--blur', type=str_to_bool, nargs='?', const=False, default=True, help='if blurring image should be applied')
+  parser.add_argument( '-count_by_area', type=str_to_bool, nargs='?', const=False, default=True, help='if cell size is determined by area(True) or cell width (False)')
+  parser.add_argument('-blur', type=str_to_bool, nargs='?', const=False, default=True, help='if blurring image should be applied')
   parser.add_argument( '--c', '-connectivity', default=4, type=int, help='connectivity', dest='connectivity')
   parser.add_argument( '--k', '-kernel_size', default=3, type=int, help='kernel size for morphological operations(odd number)', dest='kernel_size')
   parser.add_argument( '--i', '-iteration_times', default=3, type=int, help='number of morphological iteration to be performed', dest='iteration_times')
-  parser.add_argument("--morphological", choices=['opening', 'watershed', 'closing', 'dilation', 'erosion', 'top_hat', 'black_hat', 'gradient'], default='opening')
+  parser.add_argument("-morphological", choices=['opening', 'watershed', 'closing', 'dilation', 'erosion', 'top_hat', 'black_hat', 'gradient'], default='opening')
+  parser.add_argument("-search", choices=['grid', 'iteration'], default='grid', help='how segmentation is created')
   args = vars(parser.parse_args())
-  print(args)
+
   # Parse arguments
+  print(args)
   input_image = args.get('file_name')
   check_if_exist(input_image)
+  if not is_image_file(input_image):
+    sys.exit(f'input file {input_image} does not have image extension format')
   output_folder = args.get('output')
   create_directory(output_folder)
 
@@ -43,16 +47,20 @@ def main():
   get_blur = args.get('blur')
   morphological_choice = args.get('morphological')
   iteration_times = args.get('iterationo_times')
+  search_method = args.get('search')
 
 
   # initialize SegmentationGenerator
-  generator = SegmentationGenerator(input_image=input_image, output_folder=output_folder, output_image_size=output_image_size, 
-    cell_size_threshold=cell_size_threshold, cell_count=cell_count, connectivity=connectivity, by_area=by_area, 
-    morphological_choice=morphological_choice, kernel_size=kernel_size, iteration_times=iteration_times, get_blur=get_blur)
-  print(generator)
+  try:
+    generator = SegmentationGenerator(input_image=input_image, output_folder=output_folder, output_image_size=output_image_size, 
+      cell_size_threshold=cell_size_threshold, cell_count=cell_count, connectivity=connectivity, by_area=by_area, 
+      morphological_choice=morphological_choice, kernel_size=kernel_size, iteration_times=iteration_times, get_blur=get_blur, search_method=search_method)
+    print(generator)
 
-  # generate all possible segmentation that meet requirement
-  generator.generate_segmentation_images() 
+    # generate all possible segmentation that meet requirement
+    generator.generate_segmentation_images() 
+  except Exception:
+    traceback.print_exc()
 
 if __name__ == "__main__":
   main()

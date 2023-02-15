@@ -43,9 +43,14 @@ class CV2Operation:
     return cv2.GaussianBlur(matrix, (self.kernel_size, self.kernel_size), self.sigma)
 
   def apply_otus_thresholding(self, matrix): 
-    min_intensity = 0
-    max_intensity = 255
-    ret, threshold_matrix = cv2.threshold(matrix, min_intensity, max_intensity, cv2.THRESH_BINARY + cv2.THRESH_OTSU)    
+    """
+    Otus threshold determined threshold value automatically.
+    The method cv2.threshold returns two outputs: threshold that was used and thresholded image.
+    If the pixel value is smaller than the threshold, it is set to 0, otherwise it is set to a maximum value.
+    :param np.array matrix: 1D matrix of gray image
+    :return np.array matrix: binary matrix containing 0 and 255
+    """
+    ret, threshold_matrix = cv2.threshold(matrix, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)  
     return threshold_matrix
 
   def apply_morphological_operation(self, choice, matrix):

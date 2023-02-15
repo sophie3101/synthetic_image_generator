@@ -73,6 +73,9 @@ class ImageHandler(CV2Operation):
     ax2.set_title('Color by cell number')
     ax2.axis("off")
 
+    # adjust white space 
+    plt.subplots_adjust(wspace=0.05)
+
     # plt.show()
     plt.savefig(outfile_path)
 
@@ -107,8 +110,9 @@ class ImageProcesser:
     gray_matrix = self.cv2_operator.to_grayscale(self.matrix)
     if blur:
       gray_matrix = self.cv2_operator.apply_guassian(gray_matrix)
-
+  
     self.binary_matrix = self.cv2_operator.apply_otus_thresholding(gray_matrix)
+    # print(self.binary_matrix)
     out_matrix = self.cv2_operator.apply_morphological_operation(morphological_method, self.binary_matrix)
     # ImageHandler().matrix_to_image(self.binary_matrix, 'binary')
     # ImageHandler().matrix_to_image(out_matrix, '')
@@ -159,7 +163,7 @@ class ImageProcesser:
       if area >= cell_size_threshold:
           cell_count += 1
  
-    print("number of filter ", cell_count)
+    print("number of filter cells ", cell_count)
     if cell_count == required_cell_number: 
       # The second cell is the label matrix
       self.label_matrix = output[1]
@@ -173,8 +177,8 @@ class ImageProcesser:
     :return np.array color_matrix: scaled matrix
     """
     (min_val, max_val, _, _) = cv2.minMaxLoc(matrix)
+    # scale matrix to get value 0 to 255
     scale_matrix = 255 * (matrix - min_val) / (max_val - min_val)
-
     # Convert the image to 8-bits unsigned type
     scale_matrix = np.uint8(scale_matrix)
     color_matrix = self.cv2_operator.apply_color_scale(scale_matrix)
