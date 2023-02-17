@@ -1,11 +1,11 @@
 from tkinter import *
-from tkinter import filedialog, messagebox, PhotoImage
+from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 import re, sys, traceback
 from typing import TypedDict 
-
 from segmentation_generator import SegmentationGenerator
-from file_handler import get_relative_path, get_files, get_current_path, get_base_name, is_image_file
+from file_handler import get_relative_path, get_files, get_current_path, get_base_name, is_image_file, get_base_name_no_extension
+
 class DefaultValue(TypedDict):
     output_image_size: str
     cell_size: int
@@ -34,7 +34,7 @@ class GUI:
     dropdown_labels = ['Count cell size by', 'Blurring', 'Operation choice', 'Search by']
     # TypeDict does not allow key with space => create name map dict with k is item in entry_labels and value is key without space, replaced by '_'
     name_map_dict = {label:re.sub(r"\s+", '_', label.lower()) for label in entry_labels + dropdown_labels}
-    default_value_dict: DefaultValue = {'output_image_size':128, 'cell_size':10, 'cell_count':10, 'connectivity':4, 'kernel_size':3, 'iteration_times':3,
+    default_value_dict: DefaultValue = {'output_image_size':128, 'cell_size':5, 'cell_count':5, 'connectivity':4, 'kernel_size':3, 'iteration_times':3,
     'count_cell_size_by':['area', 'width'], 'blurring': ['yes', 'no'], 'search_by':['grid', 'iteration'],
     'operation_choice':['opening', 'watershed', 'closing', 'dilation', 'erosion', 'top_hat', 'black_hat', 'gradient']}
 
@@ -145,13 +145,14 @@ class GUI:
     
   def display_one_image(self):
     # pick the first output image to display
-    output_images = get_files(f'{self.output_path}/out_*')
+    output_base_name = get_base_name_no_extension(self.input_file)
+    output_images = get_files(f'{self.output_path}/{output_base_name}_*')
     if len(output_images) != 0:
       example_output_image = output_images[0]
       print(example_output_image)
       # load image
       image = Image.open(example_output_image)
-      image.resize((80,80), Image.ANTIALIAS)
+      image.resize((80,80), Image.LANCZOS)
       # create photo image
       photo = ImageTk.PhotoImage(image)
       # create label

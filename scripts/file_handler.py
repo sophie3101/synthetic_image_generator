@@ -19,8 +19,16 @@ def remove_path(path):
 
 def get_current_path(): return os.getcwd()
 
-def get_files(input_path):
-  return glob.glob(input_path)
+def get_files(pattern):
+  return glob.glob(pattern)
 
 def is_image_file(file):
+  # check ending of file
   return os.path.splitext(get_base_name(file))[1] in [".jpg", ".jpeg", ".png", ".gif", ".tiff", ".tif", ".svg"]
+
+def get_base_name_no_extension(file):
+  """
+  get only base name of file with out extension
+  E.g file_aa.txt return file_aa
+  """
+  return os.path.splitext(get_base_name(file))[0]

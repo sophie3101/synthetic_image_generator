@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from morphological_transformation import CV2Operation
 import sys
 np.set_printoptions(threshold=sys.maxsize)
+
 class ImageHandler(CV2Operation):
   """
   Class handling displaying image or matrix
@@ -93,7 +94,7 @@ class ImageProcesser:
     First the matrix is converted to gray scale: 3D matrix becomes 1D matrix
     Second the gray matrix is blured using Guassian method to remove noise (this step is optional)
     Next, the gray matrix is converted to a black and white matrix: containing min and max ( 0 and 255 by default)
-    Then, the binary matrix(black and white matrix) is perforem with morphological operations of choice
+    Then, the binary matrix(black and white matrix) is performed with morphological operations of choice
     Finally, cell numbers are counted by counting components sorrounding the cell
     :param string morphological_method: method to perform morphological operation on image
     :param int connectivity: 8 or 4 for 8-way or 4-way connectivity
@@ -107,6 +108,7 @@ class ImageProcesser:
     """
     self.cv2_operator.set_kernel_size(kernel_size)
     self.cv2_operator.set_iteration_num(iteration_times)
+    print(self.matrix)
     gray_matrix = self.cv2_operator.to_grayscale(self.matrix)
     if blur:
       gray_matrix = self.cv2_operator.apply_guassian(gray_matrix)

@@ -1,0 +1,4 @@
+matplotlib
+tk
+opencv-python
+Pillow

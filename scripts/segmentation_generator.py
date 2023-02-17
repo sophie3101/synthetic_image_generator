@@ -1,5 +1,5 @@
 from image_processing import ImageProcesser, ImageHandler
-from file_handler import remove_path, get_base_name
+from file_handler import remove_path, get_base_name, get_base_name_no_extension
 import numpy as np
 import sys
 
@@ -107,7 +107,8 @@ class SegmentationGenerator:
       # get image with cell color by label
       self.image_handler.matrix_to_file(file_name=f"{self.output_folder}/color_image_{row_idx}_{col_idx}.png", matrix=image_processor.color_matrix)
       # show two images
-      self.image_handler.show_two_images(f"{self.output_folder}/{row_idx}_{col_idx}.png", f"{self.output_folder}/color_image_{row_idx}_{col_idx}.png", f"{self.output_folder}/out_{row_idx}_{col_idx}.png")
+      output_base_name = get_base_name_no_extension(self.input_image)
+      self.image_handler.show_two_images(f"{self.output_folder}/{row_idx}_{col_idx}.png", f"{self.output_folder}/color_image_{row_idx}_{col_idx}.png", f"{self.output_folder}/{output_base_name}_out_{row_idx}_{col_idx}.png")
       remove_path(f"{self.output_folder}/{row_idx}_{col_idx}.png")
       remove_path(f"{self.output_folder}/color_image_{row_idx}_{col_idx}.png")
     
