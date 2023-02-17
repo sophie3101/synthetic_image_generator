@@ -99,9 +99,9 @@ class SegmentationGenerator:
       required_cell_number=self.cell_count, by_area=self.by_area, kernel_size=self.kernel_size, iteration_times=self.iteration_times, blur=self.get_blur)
 
     if image_processor.has_valid_matrix(): 
-      print("FOUND IT")
-      # get black and white image 
-      self.image_handler.matrix_to_file(file_name=f"{self.output_folder}/binary_image_{row_idx}_{col_idx}.png", matrix=image_processor.binary_matrix)
+      print(f"Segmentation iamge at coordinates({row_idx}, {col_idx}) is generated")
+      # # get black and white image 
+      # self.image_handler.matrix_to_file(file_name=f"{self.output_folder}/binary_image_{row_idx}_{col_idx}.png", matrix=image_processor.binary_matrix)
       # get original image
       self.image_handler.matrix_to_file(f"{self.output_folder}/{row_idx}_{col_idx}.png", slice_matrix)
       # get image with cell color by label

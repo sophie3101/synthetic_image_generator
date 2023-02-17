@@ -108,7 +108,6 @@ class ImageProcesser:
     """
     self.cv2_operator.set_kernel_size(kernel_size)
     self.cv2_operator.set_iteration_num(iteration_times)
-    print(self.matrix)
     gray_matrix = self.cv2_operator.to_grayscale(self.matrix)
     if blur:
       gray_matrix = self.cv2_operator.apply_guassian(gray_matrix)
