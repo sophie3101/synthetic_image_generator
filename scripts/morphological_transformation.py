@@ -66,7 +66,7 @@ class CV2Operation:
     if choice == 'opening': 
       return self.opening(matrix)
     elif choice == 'closing':
-      return self.cv2.morphologyEx(matrix, cv2.MORPH_CLOSE, self.kernel)
+      return cv2.morphologyEx(matrix, cv2.MORPH_CLOSE, self.kernel)
     elif choice == 'watershed':
       return self.watershed(matrix)
     elif choice == 'dilation':
