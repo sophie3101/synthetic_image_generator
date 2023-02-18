@@ -33,10 +33,10 @@ class SegmentationGenerator:
     self.search_method = search_method
   
   def __repr__(self):
-    return f"Original image: {get_base_name(self.input_image)} Output: {get_base_name(self.output_folder)} with image size\
-          {self.output_image_size} pixels, attempting to find {self.cell_count} cells with size {self.cell_size_threshold} pixels at least \
-          by using method `{self.search_method}` to generate segmentation image\.Apply morphological operation on image\
-          with method: `{self.morphological_choice}` using kernel size {self.kernel_size} and iterate this method {self.iteration_times} times"
+    return f"Original image:` {get_base_name(self.input_image)}`, Output: `{get_base_name(self.output_folder)}` with segmentation image size \
+`{self.output_image_size}` pixels, attempting to find `{self.cell_count}` cells with size `{self.cell_size_threshold}` pixels at least \
+by using method `{self.search_method}` to generate segmentation image. Apply morphological operation on image \
+with method: `{self.morphological_choice}` using kernel size `{self.kernel_size}` and iterate this method `{self.iteration_times}` times"
 
   def generate_segmentation_images(self):
     """

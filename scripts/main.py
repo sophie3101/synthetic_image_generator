@@ -19,18 +19,18 @@ def str_to_bool(val):
 
 def main():
   parser = argparse.ArgumentParser( prog='Synthetic Segmentation Generator', description='Generating synthetic image')
-  parser.add_argument( '--f', '-file_name', required=True, help='path of input image file', dest='file_name')
-  parser.add_argument( '--o', '-output', default='./output_images', help='path of output result folder', dest='output')
-  parser.add_argument( '--s', '-image_size', default=128, type=int, help='size of output segmentation image', dest='image_size')
-  parser.add_argument( '--t', '-cell_size_threshold', default=5, type=int, help='minimum size of cell', dest='cell_size')
-  parser.add_argument( '--n', '-cell_count', default=5, type=int, help='number of cells in output image', dest='cell_count')
-  parser.add_argument( '-count_by_area', type=str_to_bool, nargs='?', const=False, default=True, help='if cell size is determined by area(True) or cell width (False)')
-  parser.add_argument('-blur', type=str_to_bool, nargs='?', const=False, default=True, help='if blurring image should be applied')
-  parser.add_argument( '--c', '-connectivity', default=4, choices=[4, 8], help='connectivity', dest='connectivity')
-  parser.add_argument( '--k', '-kernel_size', default=3, type=int, help='kernel size for morphological operations(odd number)', dest='kernel_size')
-  parser.add_argument( '--i', '-iteration_times', default=3, type=int, help='number of morphological iteration to be performed', dest='iteration_times')
-  parser.add_argument("-morphological", choices=['opening', 'watershed', 'closing', 'dilation', 'erosion', 'top_hat', 'black_hat', 'gradient'], default='opening')
-  parser.add_argument("-search", choices=['grid', 'iteration'], default='grid', help='how segmentation is created')
+  parser.add_argument( '-f', '--file_name', required=True, help='path of input image file', dest='file_name')
+  parser.add_argument( '-o', '--output', default='./output_images', help='path of output result folder', dest='output')
+  parser.add_argument( '-s', '--image_size', default=128, type=int, help='size of output segmentation image', dest='image_size')
+  parser.add_argument( '-t', '--cell_size_threshold', default=5, type=int, help='minimum size of cell', dest='cell_size')
+  parser.add_argument( '-n', '--cell_count', default=5, type=int, help='number of cells in output image', dest='cell_count')
+  parser.add_argument( '--count_by_area', type=str_to_bool, nargs='?', const=False, default=True, help='if cell size is determined by area(True) or cell width (False)')
+  parser.add_argument('--blur', type=str_to_bool, nargs='?', const=False, default=True, help='if blurring image should be applied')
+  parser.add_argument( '-c', '--connectivity', type=int,choices=[4, 8], default=4, help='connectivity', dest='connectivity')
+  parser.add_argument( '-k', '--kernel_size', default=3, type=int, help='kernel size for morphological operations(odd number)', dest='kernel_size')
+  parser.add_argument( '-i', '--iteration_times', default=3, type=int, help='number of morphological iteration to be performed', dest='iteration_times')
+  parser.add_argument("--morphological", choices=['opening', 'watershed', 'closing', 'dilation', 'erosion', 'top_hat', 'black_hat', 'gradient'], default='opening')
+  parser.add_argument("--search", choices=['grid', 'iteration'], default='grid', help='how segmentation is created')
   args = vars(parser.parse_args())
 
   # Parse arguments
@@ -52,7 +52,7 @@ def main():
   by_area = args.get('count_by_area')
   get_blur = args.get('blur')
   morphological_choice = args.get('morphological')
-  iteration_times = args.get('iterationo_times')
+  iteration_times = args.get('iteration_times')
   search_method = args.get('search')
 
 
